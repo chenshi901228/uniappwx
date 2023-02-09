@@ -22,12 +22,10 @@
 				uni.$u.debounce(this.handle, 1000, true)
 			},
 			handle() {
-				uni.$u.toast("success")
-				console.log("1111")
-				this.$api.say().then(res => {
+				this.$api.login({username: "chenshi", password: 123}).then(res => {
 					console.log(res)
 				}).catch(err => {
-					console.log(err)
+					console.error(err)
 				})
 			}
 		}

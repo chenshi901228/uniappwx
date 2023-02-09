@@ -9,7 +9,7 @@ http.setConfig(config => {
 	config.timeout = 300000 //超时时长5分钟,
 	config.header = {
 		...config.header,
-	    'Content-Type': 'multipart/form-data;application/json;charset=UTF-8;'
+	    'Content-Type': 'application/json;charset=UTF-8;'
 	}
 	return config
 })
@@ -27,31 +27,38 @@ http.validateStatus = (statusCode) => {
 http.interceptors.request.use((config) => { // 可使用async await 做异步操作
     const token = uni.getStorageSync('token');
     if (token) {
-        config.header={
+        config.header = {
+			...config.header,
             "Authorization":'Bearer ' + token
         }
     }
-
-    if (config.method === 'POST') {
-        config.data = JSON.stringify(config.data);
-    }
     return config
 }, error => {
-    return Promise.resolve(error)
+    return Promise.reject(error)
 })
 
 // 响应拦截器
 http.interceptors.response.use((response) => {
-    console.log(response)
+	if (response.statusCode == 200) {
+		if(response.data.code==500){
+			if(response.data.msg){
+				uni.showToast({
+					title: response.data.msg,
+					icon: 'none'
+				})
+			}else{
+				uni.showToast({
+					title: '未知错误',
+					icon: 'none'
+				})
+			}
+		}
+		return response.data
+	}else {
+		
+	}
     return response
 }, (error) => {
-    //未登录时清空缓存跳转
-    if (error.statusCode == 401) {
-        uni.clearStorageSync();
-        uni.switchTab({
-            url: "/pages/index/index.vue"
-        })
-    }
-    return Promise.resolve(error)
+    return Promise.reject(error)
 })
 export default http;
